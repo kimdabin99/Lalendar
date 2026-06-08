@@ -220,6 +220,13 @@ export default function App() {
   function addTask(task) {
     const nextTask = { id: task.id || Date.now() + (task.copyIndex || 0), source: "manual", ...task };
     setTasks((current) => [nextTask, ...current]);
+    if (nextTask.date) {
+      const [year, month] = nextTask.date.split("-").map(Number);
+      if (Number.isFinite(year) && Number.isFinite(month)) {
+        setVisibleMonth({ year, month });
+        setSelectedDate(nextTask.date);
+      }
+    }
     if (shouldSuggestAutomation(nextTask)) {
       setAutomationPrompt(nextTask);
     }

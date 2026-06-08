@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, ClipboardList, Minus, Plus, Search, Smile } from "lucide-react";
+import { ChevronLeft, ChevronRight, ClipboardList, Minus, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { members } from "../data.js";
 import TaskItem from "../components/TaskItem.jsx";
@@ -53,6 +53,8 @@ export default function CalendarPage({
 }) {
   const [calendarScale, setCalendarScale] = useState(2);
   const [selectedDetailDate, setSelectedDetailDate] = useState(null);
+  const [isDeleteMode, setDeleteMode] = useState(false);
+  const [selectedDeleteTaskIds, setSelectedDeleteTaskIds] = useState([]);
   const [isDatePickerOpen, setDatePickerOpen] = useState(false);
   const [draftDate, setDraftDate] = useState(() => parseDateKey(selectedDate));
   const selectedDay = Number(selectedDate.slice(-2));
@@ -97,6 +99,27 @@ export default function CalendarPage({
     const normalizedDay = Math.min(draftDate.day, getDaysInMonth(draftDate.year, draftDate.month));
     onSelectCalendarDate?.(draftDate.year, draftDate.month, normalizedDay);
     setDatePickerOpen(false);
+  }
+
+  function closeDateDetail() {
+    setSelectedDetailDate(null);
+    setDeleteMode(false);
+    setSelectedDeleteTaskIds([]);
+  }
+
+  function toggleDeleteMode() {
+    setDeleteMode((current) => !current);
+    setSelectedDeleteTaskIds([]);
+  }
+
+  function toggleDeleteSelection(taskId) {
+    setSelectedDeleteTaskIds((current) => (current.includes(taskId) ? current.filter((id) => id !== taskId) : [...current, taskId]));
+  }
+
+  function deleteSelectedTasks() {
+    selectedDeleteTaskIds.forEach((taskId) => deleteTask(taskId));
+    setSelectedDeleteTaskIds([]);
+    setDeleteMode(false);
   }
 
   function updateDraftDate(part, value) {
@@ -304,22 +327,47 @@ export default function CalendarPage({
       )}
 
       {selectedDetailDate && (
-        <div className="date-detail-backdrop" role="presentation" onClick={() => setSelectedDetailDate(null)}>
+        <div className="date-detail-backdrop" role="presentation" onClick={closeDateDetail}>
           <section className="date-detail-card" role="dialog" aria-modal="true" aria-label={`${formatDateTitle(detailDate)} 할 일`} onClick={(event) => event.stopPropagation()}>
             <div className="date-detail-head">
               <div>
                 <h3>{formatDateTitle(detailDate)}</h3>
                 <p>{formatDDay(detailDate)}</p>
               </div>
-              <button type="button" aria-label="닫기" onClick={() => setSelectedDetailDate(null)}>
-                <Smile size={34} />
+              <button
+                type="button"
+                className={`date-detail-delete-toggle ${isDeleteMode ? "active" : ""}`}
+                aria-label={isDeleteMode ? "삭제 선택 취소" : "일정 삭제"}
+                disabled={detailTasks.length === 0}
+                onClick={toggleDeleteMode}
+              >
+                <Trash2 size={24} />
               </button>
             </div>
 
             <div className="date-detail-list">
               {detailTasks.map((task) => (
-                <article className={`date-detail-task ${task.done ? "done" : ""}`} key={task.id}>
-                  <button type="button" aria-label={`${task.title} 완료`} onClick={() => toggleTask(task.id)}>
+                <article
+                  className={`date-detail-task ${task.done ? "done" : ""} ${isDeleteMode ? "delete-selecting" : ""} ${
+                    selectedDeleteTaskIds.includes(task.id) ? "selected-for-delete" : ""
+                  }`}
+                  key={task.id}
+                  onClick={() => {
+                    if (isDeleteMode) toggleDeleteSelection(task.id);
+                  }}
+                >
+                  <button
+                    type="button"
+                    aria-label={isDeleteMode ? `${task.title} 삭제 선택` : `${task.title} 완료`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (isDeleteMode) {
+                        toggleDeleteSelection(task.id);
+                        return;
+                      }
+                      toggleTask(task.id);
+                    }}
+                  >
                     <span />
                   </button>
                   <div>
@@ -333,17 +381,23 @@ export default function CalendarPage({
               {detailTasks.length === 0 && <p className="date-detail-empty">이 날의 할 일이 없어요.</p>}
             </div>
 
-            <button
-              type="button"
-              className="date-detail-add"
-              onClick={() => {
-                setSelectedDate(detailDate);
-                setSelectedDetailDate(null);
-                openComposer();
-              }}
-            >
-              + 할 일을 추가하세요
-            </button>
+            {isDeleteMode ? (
+              <button type="button" className="date-detail-delete-action" onClick={deleteSelectedTasks} disabled={selectedDeleteTaskIds.length === 0}>
+                삭제하기
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="date-detail-add"
+                onClick={() => {
+                  setSelectedDate(detailDate);
+                  closeDateDetail();
+                  openComposer();
+                }}
+              >
+                + 할 일을 추가하세요
+              </button>
+            )}
           </section>
         </div>
       )}

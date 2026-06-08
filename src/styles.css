@@ -2664,9 +2664,12 @@ button {
 
 .composer {
   width: min(520px, 100%);
+  max-height: calc(100svh - 40px);
   padding: 20px;
   border-radius: 30px;
   background: #fff;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   box-shadow: 0 30px 90px rgba(109, 12, 42, 0.26);
   animation: soft-enter 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
@@ -3481,9 +3484,9 @@ button {
   }
 
   .composer-backdrop {
-    align-items: center;
-    place-items: center;
-    padding: max(10px, env(safe-area-inset-top)) 8px max(10px, env(safe-area-inset-bottom));
+    align-items: end;
+    place-items: end center;
+    padding: max(12px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom));
     background: rgba(15, 10, 12, 0.72);
   }
 
@@ -3494,6 +3497,63 @@ button {
   .composer,
   .detail-panel {
     border-radius: 26px;
+  }
+
+  .composer {
+    width: min(356px, calc(100vw - 24px));
+    max-height: min(740px, calc(100svh - 30px));
+    padding: 18px 20px 20px;
+    border-radius: 24px 24px 22px 22px;
+  }
+
+  .composer .composer-head {
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .composer .composer-head p {
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+
+  .composer .composer-head h2 {
+    font-size: 28px;
+    line-height: 1.08;
+  }
+
+  .composer .composer-head button {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+  }
+
+  .composer label {
+    gap: 7px;
+    margin-top: 12px;
+    font-size: 12px;
+  }
+
+  .composer input,
+  .composer select,
+  .composer textarea {
+    min-height: 46px;
+    border-radius: 14px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .composer textarea {
+    min-height: 74px;
+    padding: 10px 12px;
+  }
+
+  .composer-submit {
+    position: sticky;
+    bottom: -20px;
+    margin: 14px -20px -20px;
+    height: 58px;
+    border-radius: 0 0 22px 22px;
+    box-shadow: 0 -10px 24px rgba(255, 255, 255, 0.92), 0 12px 24px rgba(225, 29, 72, 0.18);
   }
 
   .schedule-modal {
@@ -5108,6 +5168,15 @@ body {
   color: #b8b8b8;
 }
 
+.date-detail-head button:disabled {
+  opacity: 0.35;
+}
+
+.date-detail-delete-toggle.active {
+  color: var(--red);
+  background: #fff1f4;
+}
+
 .date-detail-list {
   display: grid;
   align-content: start;
@@ -5126,6 +5195,15 @@ body {
   padding: 10px 12px;
   border-radius: 16px;
   background: #f7f8fb;
+}
+
+.date-detail-task.delete-selecting {
+  cursor: pointer;
+}
+
+.date-detail-task.selected-for-delete {
+  background: #fff1f4;
+  box-shadow: inset 0 0 0 2px rgba(225, 29, 72, 0.22);
 }
 
 .date-detail-task > button {
@@ -5153,6 +5231,15 @@ body {
 }
 
 .date-detail-task.done > button span {
+  border-color: #fff;
+}
+
+.date-detail-task.selected-for-delete > button {
+  border-color: var(--red);
+  background: var(--red);
+}
+
+.date-detail-task.selected-for-delete > button span {
   border-color: #fff;
 }
 
@@ -5201,6 +5288,24 @@ body {
   font-size: 18px;
   font-weight: 700;
   text-align: left;
+}
+
+.date-detail-delete-action {
+  min-height: 58px;
+  justify-content: center;
+  padding: 0 22px;
+  border-radius: 8px;
+  background: var(--red);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+  text-align: center;
+  box-shadow: 0 14px 28px rgba(225, 29, 72, 0.2);
+}
+
+.date-detail-delete-action:disabled {
+  opacity: 0.45;
+  box-shadow: none;
 }
 
 .calendar-date-picker-backdrop {
